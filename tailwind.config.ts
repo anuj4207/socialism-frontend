@@ -18,6 +18,7 @@ const config: Config = {
       lightBlueBg: '#176B87',
       white: '#FFFFFF',
       text: '#103F53',
+      lightGrey: '#D9D9D9',
     },
 
     borderWidth: {

@@ -11,3 +11,15 @@ export async function fetchMyProfile() {
   const data = await res.json();
   return data;
 }
+
+export async function fetchUpcomingEvent() {
+  const res = await fetch(`${BACKEDN_URL}/event/myEvent`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+  const data = await res.json();
+  return data;
+}
