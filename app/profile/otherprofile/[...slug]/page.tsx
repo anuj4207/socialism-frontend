@@ -3,15 +3,21 @@
 import { checkAuthentication } from '@/app/utils/Auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { fetchMyProfile, fetchUpcomingEvent } from './api/route';
+import {
+  fetchOtherProfile,
+  fetchUpcomingEvent,
+  follow,
+  unFollow,
+} from '../api/route';
 import Event from '@/app/home/components/event/event';
 
-export default function Page() {
+export default function Page(props: any) {
   const router = useRouter();
   const [nav, setNav] = useState('event');
   const [subnav, setSubnav] = useState('upcoming');
   const [myDetail, setMyDetail] = useState({});
   const [event, setEvent] = useState([]);
+  const [error, setError] = useState(false);
   useEffect(() => {
     if (!checkAuthentication()) {
       router.push('/');
@@ -20,35 +26,45 @@ export default function Page() {
     }
   }, []);
   useEffect(() => {
-    console.log(getEvents());
+    getEvents();
   }, [myDetail]);
-  useEffect(() => {
-    console.log(event);
-  }, [nav, subNav, event]);
+  useEffect(() => {}, [nav, subnav, event, error]);
   async function getProfileDetails() {
-    let msg = await fetchMyProfile();
+    let msg = await fetchOtherProfile(props.params.slug[0]);
     if (msg.msg === 'success') {
       setMyDetail(msg.data);
     }
   }
   async function getEvents() {
-    console.log('fetch events', myDetail.id);
-
-    let msg = await fetchUpcomingEvent(myDetail.id);
+    let msg = await fetchUpcomingEvent(props.params.slug[0]);
     if (msg.msg === 'success') {
       if (msg.data.length > 0) {
         setEvent(msg.data);
       }
     }
   }
+  async function followUser() {
+    let msg = await follow(props.params.slug[0]);
+    if (msg.msg === 'success') {
+      setError(false);
+    } else {
+      setError(true);
+    }
+  }
+  async function unFollowUser() {
+    let msg = await unFollow(props.params.slug[0]);
+    if (msg.msg === 'success') {
+      setError(false);
+    } else {
+      setError(true);
+    }
+  }
   function fetchEvent(type: string) {
     if (type === 'upcoming') {
-      return event.filter((v) => v.adminId !== myDetail.id);
-    } else if (type === 'myevent') {
-      return event.filter((v) => v.adminId == myDetail.id);
+      return event.filter((v) => v.adminId != props.params.slug[0]);
+    } else if (type === 'hosted') {
+      return event.filter((v) => v.adminId == props.params.slug[0]);
     } else if (type === 'completed') {
-      console.log(new Date(event[0].date).getTime(), new Date().getTime());
-
       return event.filter(
         (v) => new Date(v.date).getTime() < new Date().getTime,
       );
@@ -62,7 +78,12 @@ export default function Page() {
             fetchEvent(v)?.map((v, i) => {
               return (
                 <div>
-                  <Event details={v} key={i}></Event>
+                  <Event
+                    details={v}
+                    key={i * 10 + i}
+                    uId={props.params.slug[1]}
+                    type="upcoming"
+                  ></Event>
                 </div>
               );
             })
@@ -88,7 +109,7 @@ export default function Page() {
           )}
         </div>
       );
-    } else if (v === 'myevent') {
+    } else if (v === 'hosted') {
       return (
         <div className="flex flex-col h-72 overflow-y-scroll mx-4">
           {fetchEvent(v)?.length > 0 ? (
@@ -98,8 +119,8 @@ export default function Page() {
                   <Event
                     details={v}
                     key={i}
-                    uId={myDetail.id}
-                    type="upcoming"
+                    uId={props.params.slug[1]}
+                    type="hosted"
                   ></Event>
                 </div>
               );
@@ -127,7 +148,7 @@ export default function Page() {
         </div>
       );
     } else if (v === 'completed') {
-      return <div className="mx-6">{fetchEvent(v)}</div>;
+      return <div className="mx-6"></div>;
     } else if (v === 'mypost') {
       return <div>mypost</div>;
     } else if (v === 'feed') {
@@ -154,10 +175,10 @@ export default function Page() {
               className="focus:font-semibold"
               onClick={(e) => {
                 e.preventDefault();
-                setSubnav('myevent');
+                setSubnav('hosted');
               }}
             >
-              My events
+              Hosted
             </button>
             <button
               className="focus:font-semibold"
@@ -207,7 +228,7 @@ export default function Page() {
       {/* profile details */}
       <div className="flex flex-col w-full mt-2">
         <div className=" flex flex-row justify-around laptop:justify-around laptop:gap-32 items-center">
-          <div className="flex flex-row gap-2 laptop:gap-8">
+          <div className="flex flex-row gap-2 laptop:gap-8 w-full mx-4">
             <div className="w-20 h-20 bg-lightBlue rounded-full flex justify-center border-2 border-white drop-shadow-2xl">
               <img
                 src="/profile.svg"
@@ -219,14 +240,41 @@ export default function Page() {
               <div className="text-lg">{myDetail.about}</div>
             </div>
           </div>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              router.push('/profile/create');
-            }}
-          >
-            <img src="/edit.svg" alt="404" className="w-6 h-6 opacity-70" />
-          </button>
+
+          {'followerId' in myDetail ? (
+            myDetail.followerId.filter((v: number) => v == props.params.slug[1])
+              .length > 0 ? (
+              <div className="mr-6 flex flex-col items-center">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    unFollowUser();
+                  }}
+                >
+                  <img
+                    className="w-8 h-8 opacity-70 drop-shadow-md"
+                    src="/cancel.svg"
+                  ></img>
+                </button>
+                <div className="text-xs">Unfollow</div>
+              </div>
+            ) : (
+              <div className="mr-6 flex flex-col items-center">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    followUser();
+                  }}
+                >
+                  <img
+                    className="w-8 h-8 opacity-70 drop-shadow-md"
+                    src="/add.svg"
+                  ></img>
+                </button>
+                <div className="text-xs">Follow</div>
+              </div>
+            )
+          ) : null}
         </div>
         <div className="mt-2 flex flex-row justify-around laptop:justify-around gap-6 laptop:gap-24  items-center">
           <div className="flex flex-col items-center">
@@ -267,7 +315,7 @@ export default function Page() {
               if (i > 0) {
                 return (
                   <div
-                    key={i}
+                    key={i * 10 + i}
                     className="border-1 bg-lightPink font-medium p-1 text-xs rounded-md drop-shadow-lg"
                   >
                     {v}

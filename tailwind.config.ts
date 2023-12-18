@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     screens: {
       tablet: '640px',
-      laptop: '1024px',
+      laptop: '1000px',
       mobile: { max: '639px' },
     },
     colors: {

@@ -1,8 +1,36 @@
 'use client';
-export default function Event(props: any, key: number) {
+
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { cancelEvent, joinEvent } from '../../api/route';
+
+export default function Event(props: any) {
   let data = props.details;
   let dateMonth = data.date.slice(5, 7);
   let dateDate = data.date.slice(8, 10);
+  const [joinError, setJoinError] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {}, [joinError]);
+  async function joinEventReq() {
+    let msg = await joinEvent(data.id);
+    if (msg === 'error') {
+      setJoinError(true);
+    } else {
+      setJoinError(false);
+      router.push('/home');
+    }
+  }
+  async function cancelEventReq() {
+    let msg = await cancelEvent(data.id);
+
+    if (msg === 'error') {
+      setJoinError(true);
+    } else {
+      setJoinError(false);
+      router.push('/home');
+    }
+  }
   function month(mon: string) {
     switch (mon) {
       case '01':
@@ -31,16 +59,56 @@ export default function Event(props: any, key: number) {
         return 'Dec';
     }
   }
-  return (
-    <div className="border-2 rounded-md border-lightBlueBg shadow-md h-32 flex flex-row my-2">
-      <div className="h-full  bg-lightBlueBg">
-        <div className="flex flex-col gap-1 m-2 items-center">
-          <div className="font-medium text-white mt-0">{month(dateMonth)}</div>
-          <div className="font-bold text-white text-2xl">{dateDate}</div>
+  function cancelDiv() {
+    return (
+      <button
+        className="-translate-x-4 -translate-y-4 bg-lightPink text-white text-xs border-1 border-text drop-shadow-lg rounded-lg"
+        onClick={(e) => {
+          e.preventDefault();
+          cancelEventReq();
+        }}
+      >
+        <img src="/cancel.svg" className="w-8 h-8 opacity-60"></img>
+      </button>
+    );
+  }
+  function joinDiv() {
+    console.log(props.uId, data.adminId);
+
+    if (
+      props.uId == data.adminId ||
+      data.confirmedUser.filter((v) => v == props.uId).length == 1
+    ) {
+      return cancelDiv();
+    } else if (data.pendingUser.filter((v) => v == props.uId).length == 0) {
+      return (
+        <button
+          className="p-1 -translate-x-4 -translate-y-4 bg-lightBlue text-white text-xs border-1 border-text drop-shadow-lg rounded-lg "
+          onClick={(e) => {
+            e.preventDefault();
+            joinEventReq();
+          }}
+        >
+          <img src="/join.svg" className="w-6 h-6 opacity-60"></img>
+        </button>
+      );
+    } else {
+      return (
+        <button className="p-1 -translate-x-4 -translate-y-4 bg-lightBlue text-white text-xs border-1 border-text drop-shadow-lg rounded-lg ">
+          <img src="/time.svg" className="w-6 h-6 opacity-60"></img>
+        </button>
+      );
+    }
+  }
+  function basisDiv() {
+    return (
+      <div className="flex flex-col items-start w-full m-2 mt-1 ">
+        <div className="flex flex-row w-full">
+          <div className="text-lg font-semibold">{data.title}</div>
+          <div className="flex w-full justify-end mr-4 items-center translate-y-2">
+            <div className="p-0.5 border-1  rounded-md  px-1">{data.tag}</div>
+          </div>
         </div>
-      </div>
-      <div className=" flex flex-col items-start w-full m-2 mt-1 ">
-        <div className="text-lg font-semibold">{data.title}</div>
         <div className="-translate-y-1 font-light text-sm w-full border-b-1">
           {data.description}
         </div>
@@ -52,7 +120,7 @@ export default function Event(props: any, key: number) {
           <img src="/location.svg" className="w-4 h-4 opacity-60" alt="404" />
           <div className="text-sm">{data.address}</div>
         </div>
-        <div className="flex flex-row gap-2 items-end  w-full">
+        <div className="flex flex-row gap-2 items-center w-full">
           <img
             src="/group.svg"
             className="w-4 h-4 opacity-60 -translate-y-1"
@@ -60,12 +128,28 @@ export default function Event(props: any, key: number) {
           />
           <div className="text-sm -translate-y-1">{data.maxMembers}</div>
           <div className="grow flex justify-end -translate-y-1">
-            <button className="p-1 bg-lightBlue text-white text-xs border-1 border-text drop-shadow-lg rounded-lg ">
-              See Details
-            </button>
+            {joinDiv()}
           </div>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="border-2 rounded-md border-lightBlueBg shadow-md h-32 flex flex-row my-2">
+      <div className="h-full  bg-lightBlueBg">
+        <div className="flex flex-col gap-1 m-2 items-center">
+          <div className="font-medium text-white mt-0">{month(dateMonth)}</div>
+          <div className="font-bold text-white text-2xl">{dateDate}</div>
+        </div>
+      </div>
+      {joinError ? (
+        <div className="flex w-full items-center justify-around text-lightPink font-thin">
+          400 Something Went Wrong
+        </div>
+      ) : (
+        basisDiv()
+      )}
     </div>
   );
 }

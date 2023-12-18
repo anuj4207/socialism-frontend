@@ -12,6 +12,8 @@ function Page() {
   async function handleSubmit(e: any) {
     e.preventDefault();
     let msg = await sendOtp(`+91${number}`);
+    console.log(msg);
+
     if (msg.msg === 'error') {
       setError(true);
     } else {

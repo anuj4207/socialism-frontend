@@ -19,13 +19,17 @@ export default function Page() {
   const [nearbyE, setNearbyE] = useState([]);
   const [tag, setTag] = useState([]);
   const [countUpcoming, setCountUpcoming] = useState(0);
+  const [myDetail, setMyDetail] = useState({});
   const [post, setPost] = useState(1);
   const router = useRouter();
+
   useEffect(() => {
     getDetails();
+  }, []);
+  useEffect(() => {
     myEvent();
     nearbyEvent();
-  }, []);
+  }, [myDetail]);
   useEffect(() => {}, [nearbyE, name, city, state, event, countUpcoming, tag]);
   async function getDetails() {
     let msg = await fetchMyProfile();
@@ -34,10 +38,11 @@ export default function Page() {
       setCity(msg.data.city);
       setState(msg.data.state);
       setTag(msg.data.tags);
+      setMyDetail(msg.data);
     }
   }
   async function myEvent() {
-    let upcoming = await fetchUpcomingEvent();
+    let upcoming = await fetchUpcomingEvent(myDetail.id);
     if (upcoming.msg === 'success') {
       if (upcoming.data.length > 0) {
         setCountUpcoming(0);
@@ -48,7 +53,6 @@ export default function Page() {
   async function nearbyEvent() {
     let nearby = await fetchNearbyEvent();
     if (nearby.msg === 'success') {
-      console.log(nearby);
       if (nearby.data.length > 0) {
         setNearbyE(nearby.data);
       }
@@ -90,12 +94,14 @@ export default function Page() {
                   e.preventDefault();
                   setSearch(e.target.value);
                 }}
+                value={search}
                 placeholder="Events, people .."
-                className="drop-shadow-xl text-white w-11/12 bg-white   border-text p-1 "
+                className="drop-shadow-xl text-text w-11/12 bg-white   border-text p-1 "
               ></input>
               <button
                 onClick={(e) => {
                   e.preventDefault();
+                  router.push(`/search/${search}/event`);
                 }}
               >
                 <img
@@ -125,7 +131,7 @@ export default function Page() {
           </div>
           <div className="laptop:p-4 ">
             {event.length > 0 ? (
-              <div className="flex flex-row laptop:gap-28 justify-center ">
+              <div className="flex flex-row laptop:gap-16 justify-center ">
                 <div
                   className={
                     countUpcoming > 0 ? 'visible self-center' : 'invisible'
@@ -143,7 +149,12 @@ export default function Page() {
                   </button>
                 </div>
                 <div className="basis-5/6 ml-2 mr-2 ">
-                  <Event details={event[countUpcoming]}></Event>
+                  <Event
+                    details={event[countUpcoming]}
+                    type="upcoming"
+                    key={countUpcoming * 10 + countUpcoming}
+                    uId={parseInt(myDetail.id)}
+                  ></Event>
                 </div>
                 <div
                   className={
@@ -227,7 +238,14 @@ export default function Page() {
                 </div> */}
                 <div className="basis-5/6 ml-2 mr-2 pt-2 ">
                   {nearbyE.map((v, i) => {
-                    return <Event details={v} key={i}></Event>;
+                    return (
+                      <Event
+                        details={v}
+                        key={i}
+                        type="nearby"
+                        uId={myDetail.id}
+                      ></Event>
+                    );
                   })}
                 </div>
                 {/* <div
