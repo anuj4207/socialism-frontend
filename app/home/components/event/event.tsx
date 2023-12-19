@@ -62,13 +62,13 @@ export default function Event(props: any) {
   function cancelDiv() {
     return (
       <button
-        className="-translate-x-4 -translate-y-4 bg-lightPink text-white text-xs border-1 border-text drop-shadow-lg rounded-lg"
+        className=" bg-lightPink text-white text-xs border-1 border-text drop-shadow-lg rounded-lg"
         onClick={(e) => {
           e.preventDefault();
           cancelEventReq();
         }}
       >
-        <img src="/cancel.svg" className="w-8 h-8 opacity-60"></img>
+        <img src="/cancel.svg" className="w-6 h-6 opacity-60"></img>
       </button>
     );
   }
@@ -83,19 +83,34 @@ export default function Event(props: any) {
     } else if (data.pendingUser.filter((v) => v == props.uId).length == 0) {
       return (
         <button
-          className="p-1 -translate-x-4 -translate-y-4 bg-lightBlue text-white text-xs border-1 border-text drop-shadow-lg rounded-lg "
+          className="p-1  bg-lightBlue text-white text-xs border-1 border-text drop-shadow-lg rounded-lg "
           onClick={(e) => {
             e.preventDefault();
             joinEventReq();
           }}
         >
-          <img src="/join.svg" className="w-6 h-6 opacity-60"></img>
+          <img src="/join.svg" className="w-4 h-4 opacity-60"></img>
         </button>
       );
     } else {
       return (
-        <button className="p-1 -translate-x-4 -translate-y-4 bg-lightBlue text-white text-xs border-1 border-text drop-shadow-lg rounded-lg ">
-          <img src="/time.svg" className="w-6 h-6 opacity-60"></img>
+        <button className="p-1 bg-lightBlue text-white text-xs border-1 border-text drop-shadow-lg rounded-lg ">
+          <img src="/time.svg" className="w-4 h-4 opacity-60"></img>
+        </button>
+      );
+    }
+  }
+  function showProfile() {
+    if (data.adminId != props.uId) {
+      return (
+        <button
+          className="drop-shadow-2xl p-0.5"
+          onClick={(e) => {
+            e.preventDefault();
+            router.push(`/profile/otherprofile/${data.adminId}/${props.uId}`);
+          }}
+        >
+          <img src="/info.svg" alt="" className="w-4 h-4" />
         </button>
       );
     }
@@ -103,32 +118,43 @@ export default function Event(props: any) {
   function basisDiv() {
     return (
       <div className="flex flex-col items-start w-full m-2 mt-1 ">
-        <div className="flex flex-row w-full">
+        <div className="flex flex-row w-full ">
           <div className="text-lg font-semibold">{data.title}</div>
-          <div className="flex w-full justify-end mr-4 items-center translate-y-2">
-            <div className="p-0.5 border-1  rounded-md  px-1">{data.tag}</div>
+          <div className=" flex justify-end w-full ">
+            <div className=" rounded-md pb-0.5 text-sm border-1 px-1 text-text m-1">
+              {data.tag}
+            </div>
           </div>
         </div>
         <div className="-translate-y-1 font-light text-sm w-full border-b-1">
           {data.description}
         </div>
-        <div className="flex flex-row gap-2 items-center ">
-          <img src="/time.svg" className="w-4 h-4 opacity-60" alt="404" />
-          <div className="text-sm">{data.time}</div>
-        </div>
-        <div className="flex flex-row gap-2 items-end ">
-          <img src="/location.svg" className="w-4 h-4 opacity-60" alt="404" />
-          <div className="text-sm">{data.address}</div>
-        </div>
-        <div className="flex flex-row gap-2 items-center w-full">
-          <img
-            src="/group.svg"
-            className="w-4 h-4 opacity-60 -translate-y-1"
-            alt="404"
-          />
-          <div className="text-sm -translate-y-1">{data.maxMembers}</div>
-          <div className="grow flex justify-end -translate-y-1">
-            {joinDiv()}
+        <div className="flex flex-row  w-full justify-start">
+          <div className="flex flex-col ">
+            <div className="flex flex-row gap-2 items-center ">
+              <img src="/time.svg" className="w-4 h-4 opacity-60" alt="404" />
+              <div className="text-sm">{data.time}</div>
+            </div>
+            <div className="flex flex-row gap-2 items-center">
+              <img
+                src="/location.svg"
+                className="w-4 h-4 opacity-60"
+                alt="404"
+              />
+              <div className="text-sm">{data.address}</div>
+            </div>
+            <div className="flex flex-row gap-2 items-center">
+              <img
+                src="/group.svg"
+                className="w-4 h-4 opacity-60 -translate-y-1"
+                alt="404"
+              />
+              <div className="text-sm -translate-y-1">{data.maxMembers}</div>
+            </div>
+          </div>
+          <div className="flex flex-col  w-full items-end justify-around">
+            <div className="">{showProfile()}</div>
+            <div className="self-end">{joinDiv()}</div>
           </div>
         </div>
       </div>

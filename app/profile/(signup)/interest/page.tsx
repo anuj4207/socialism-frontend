@@ -4,6 +4,7 @@ import { tags } from '@/public/tag';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { addInterest } from '../api/route';
+import { checkAuthentication } from '@/app/utils/Auth';
 
 export default function Page() {
   const [tag, setTag] = useState(['']);
@@ -24,6 +25,11 @@ export default function Page() {
       router.push('/home');
     }
   }
+  useEffect(() => {
+    if (!checkAuthentication()) {
+      router.push('/');
+    }
+  });
   useEffect(() => {}, [tag]);
   return (
     <div className="flex flex-col h-screen">

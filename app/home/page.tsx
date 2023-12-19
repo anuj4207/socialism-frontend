@@ -9,6 +9,7 @@ import {
 import Event from './components/event/event';
 import { useRouter } from 'next/navigation';
 import Post from './components/post/post';
+import { checkAuthentication } from '../utils/Auth';
 
 export default function Page() {
   const [search, setSearch] = useState('');
@@ -18,11 +19,16 @@ export default function Page() {
   const [event, setEvent] = useState([]);
   const [nearbyE, setNearbyE] = useState([]);
   const [tag, setTag] = useState([]);
+  const [navTag, setNavTag] = useState('');
   const [countUpcoming, setCountUpcoming] = useState(0);
   const [myDetail, setMyDetail] = useState({});
   const [post, setPost] = useState(1);
   const router = useRouter();
-
+  useEffect(() => {
+    if (!checkAuthentication()) {
+      router.push('/');
+    }
+  });
   useEffect(() => {
     getDetails();
   }, []);
@@ -31,6 +37,7 @@ export default function Page() {
     nearbyEvent();
   }, [myDetail]);
   useEffect(() => {}, [nearbyE, name, city, state, event, countUpcoming, tag]);
+  useEffect(() => {}, [navTag]);
   async function getDetails() {
     let msg = await fetchMyProfile();
     if (msg.msg === 'success') {
@@ -58,9 +65,6 @@ export default function Page() {
       }
     }
   }
-  // function nearbyType(type: string) {
-  //   return nearbyE.filter((v) => v.tag === tag);
-  // }
   return (
     <div className="w-screen">
       {/* main */}
@@ -74,7 +78,7 @@ export default function Page() {
             {/* profile */}
             <div>
               <button
-                className="bg-lightBlue drop-shadow-xl w-8 h-8 rounded-full flex justify-center"
+                className="bg-lightBlue drop-shadow-xl w-8 h-8 rounded-full flex justify-center border-2 border-text"
                 onClick={(e) => {
                   e.preventDefault();
                   router.push('/profile/myprofile');
@@ -87,7 +91,7 @@ export default function Page() {
               </button>
             </div>
             {/* search */}
-            <div className="border-1 rounded-xs flex flex-row grow">
+            <div className="border-2 rounded-md flex flex-row grow">
               <input
                 type="text"
                 onChange={(e) => {
@@ -111,12 +115,17 @@ export default function Page() {
               </button>
             </div>
             {/* location */}
-            <div>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                router.push('/profile/location/update');
+              }}
+            >
               <img
                 src="/location.svg"
                 className="drop-shadow-xl w-10 h-10"
               ></img>
-            </div>
+            </button>
             {/* chat */}
             <div>
               <img src="/chat.svg" className="drop-shadow-xl w-10 h-10"></img>
@@ -201,9 +210,15 @@ export default function Page() {
             <div className="font-bold text-lg -mt-2">Nearby</div>
             <div className="flex flex-row gap-4 border-b-1 text-sm pb-1">
               {tag.map((v, i) => {
-                if (i > 0 && i < 4) {
+                if (i < 4 && v !== '') {
                   return (
-                    <button key={i} onClick={() => {}}>
+                    <button
+                      key={i}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setNavTag(v);
+                      }}
+                    >
                       {v}
                     </button>
                   );
@@ -220,52 +235,29 @@ export default function Page() {
                     : 'h-44 flex flex-row laptop:gap-28 justify-center snap-center overflow-y-scroll'
                 }
               >
-                {/* <div
-                  className={
-                    countUpcoming > 0 ? 'visible self-center' : 'invisible'
-                  }
-                >
-                  <button>
-                    <img
-                      src="/arrow_forward.svg"
-                      className="w-6 h-6 opacity-50 rotate-180"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCountUpcoming(countUpcoming - 1);
-                      }}
-                    ></img>
-                  </button>
-                </div> */}
                 <div className="basis-5/6 ml-2 mr-2 pt-2 ">
                   {nearbyE.map((v, i) => {
-                    return (
-                      <Event
-                        details={v}
-                        key={i}
-                        type="nearby"
-                        uId={myDetail.id}
-                      ></Event>
-                    );
+                    if (navTag === '') {
+                      return (
+                        <Event
+                          details={v}
+                          key={i}
+                          type="nearby"
+                          uId={myDetail.id}
+                        ></Event>
+                      );
+                    } else if (v.tag === navTag) {
+                      return (
+                        <Event
+                          details={v}
+                          key={i}
+                          type="nearby"
+                          uId={myDetail.id}
+                        ></Event>
+                      );
+                    }
                   })}
                 </div>
-                {/* <div
-                  className={
-                    countUpcoming < event.length - 1
-                      ? 'visible self-center'
-                      : 'invisible'
-                  }
-                >
-                  <button>
-                    <img
-                      src="/arrow_forward.svg"
-                      className="w-6 h-6 opacity-50"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setCountUpcoming(countUpcoming + 1);
-                      }}
-                    ></img>
-                  </button>
-                </div> */}
               </div>
             ) : (
               <div className="border-2 border-dashed flex flex-col gap-2 items-center m-2 ml-6 mr-6 laptop:ml-4 laptop:mr-4 p-2">

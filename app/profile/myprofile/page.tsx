@@ -12,6 +12,7 @@ export default function Page() {
   const [subnav, setSubnav] = useState('upcoming');
   const [myDetail, setMyDetail] = useState({});
   const [event, setEvent] = useState([]);
+
   useEffect(() => {
     if (!checkAuthentication()) {
       router.push('/');
@@ -202,32 +203,57 @@ export default function Page() {
       );
     }
   }
+  function logOut() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('expAt');
+      localStorage.removeItem('token');
+      router.push('/');
+    }
+  }
   return (
-    <div className="flex flex-col h-screen gap-2 laptop:ml-64 laptop:mr-64 ">
+    <div className="flex flex-col h-screen gap-2 laptop:gap-10 laptop:ml-64 laptop:mr-64 ">
       {/* profile details */}
-      <div className="flex flex-col w-full mt-2">
-        <div className=" flex flex-row justify-around laptop:justify-around laptop:gap-32 items-center">
-          <div className="flex flex-row gap-2 laptop:gap-8">
-            <div className="w-20 h-20 bg-lightBlue rounded-full flex justify-center border-2 border-white drop-shadow-2xl">
-              <img
-                src="/profile.svg"
-                className="w-12 h-12 self-center opacity-50 "
-              ></img>
-            </div>
-            <div className="-my-1 flex flex-col laptop:text-2xl text-xl self-center">
+      <div className="flex flex-col  mt-2 mx-4 laptop:gap-6">
+        <div className="flex flex-row gap-2 justify-around laptop:gap-8">
+          <div className="w-20 h-20 bg-lightBlue rounded-full flex justify-center border-2 border-white drop-shadow-2xl">
+            <img
+              src="/profile.svg"
+              className="w-12 h-12 self-center opacity-50 "
+            ></img>
+          </div>
+          <div className="-translate-x-6 flex flex-col laptop:text-2xl text-xl self-center basis-1/3 ">
+            <div className="flex flex-row gap-4">
               <div className="font-semibold">{myDetail.name}</div>
-              <div className="text-lg">{myDetail.about}</div>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push('/profile/create');
+                }}
+              >
+                <img src="/edit.svg" alt="404" className="w-4 h-4 opacity-70" />
+              </button>
+            </div>
+            <div className="text-xs">{myDetail.about}</div>
+          </div>
+          <div className="flex flex-col gap-2 justify-around items-center">
+            <div className="flex flex-col items-center">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  logOut();
+                }}
+              >
+                <img
+                  src="/logout.svg"
+                  alt="404"
+                  className="w-6 h-6 opacity-70 "
+                />
+              </button>
+              <div className="text-xs">LogOut</div>
             </div>
           </div>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              router.push('/profile/create');
-            }}
-          >
-            <img src="/edit.svg" alt="404" className="w-6 h-6 opacity-70" />
-          </button>
         </div>
+
         <div className="mt-2 flex flex-row justify-around laptop:justify-around gap-6 laptop:gap-24  items-center">
           <div className="flex flex-col items-center">
             <div>
@@ -264,11 +290,11 @@ export default function Page() {
         <div className="flex flex-row flex-wrap gap-4 ">
           {'tags' in myDetail ? (
             myDetail.tags.map((v: any, i: number) => {
-              if (i > 0) {
+              if (v !== '') {
                 return (
                   <div
                     key={i}
-                    className="border-1 bg-lightPink font-medium p-1 text-xs rounded-md drop-shadow-lg"
+                    className=" bg-text text-white pb-1 font-medium px-1 text-xs rounded-md drop-shadow-lg"
                   >
                     {v}
                   </div>

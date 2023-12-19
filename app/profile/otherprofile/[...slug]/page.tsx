@@ -299,15 +299,6 @@ export default function Page(props: any) {
       <div className="basis-1/6  flex flex-col gap-2 laptop:gap-4 mt-2 border-4 border-lightGrey rounded-md mx-4 p-4">
         <div className="flex flex-row w-full ">
           <div className="text-lg laptop:text-xl font-bold">Interest</div>
-          <button
-            className="w-full flex justify-end items-center"
-            onClick={(e) => {
-              e.preventDefault();
-              router.push('/profile/interest');
-            }}
-          >
-            <img src="/edit.svg" alt="404" className="w-4 h-4 opacity-70 " />
-          </button>
         </div>
         <div className="flex flex-row flex-wrap gap-4 ">
           {'tags' in myDetail ? (

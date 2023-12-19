@@ -6,6 +6,7 @@ import { tagDrop, tags } from '@/public/tag';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { createEvent } from '../../api/route';
+import { checkAuthentication } from '@/app/utils/Auth';
 
 export default function Page({ params }: { params: { slug: string[] } }) {
   const [address, setAddress] = useState('');
@@ -18,6 +19,11 @@ export default function Page({ params }: { params: { slug: string[] } }) {
   const [tag, setTag] = useState('');
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  useEffect(() => {
+    if (!checkAuthentication()) {
+      router.push('/');
+    }
+  });
   useEffect(() => {}, [
     tag,
     address,

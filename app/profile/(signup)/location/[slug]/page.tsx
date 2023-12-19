@@ -5,9 +5,9 @@ import { checkAuthentication } from '@/app/utils/Auth';
 import { Location } from '@/public/location';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { updateLocaiton } from '../api/route';
+import { updateLocaiton } from '../../api/route';
 
-function Page() {
+function Page(props: any) {
   const router = useRouter();
   const [state, setState] = useState('Select State');
   const [city, setCity] = useState('Select City');
@@ -15,7 +15,11 @@ function Page() {
   async function handleSubmit() {
     let msg = await updateLocaiton({ state: state, city: city });
     if (msg.msg === 'success') {
-      router.push('/profile/create');
+      if (props.params.slug === 'new') {
+        router.push('/profile/create');
+      } else if (props.params.slug === 'update') {
+        router.push('/home');
+      }
     }
   }
   useEffect(() => {
