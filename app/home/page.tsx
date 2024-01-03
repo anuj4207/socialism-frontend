@@ -321,7 +321,7 @@ export default function Page() {
               className="opacity-60 focus:opacity-100 focus:drop-shadow-lg"
               onClick={(e) => {
                 e.preventDefault();
-                router.push('/post');
+                router.push(`/post/${myDetail.id}`);
               }}
             >
               <img src="/post.svg" className="w-10 h-10 "></img>
@@ -329,7 +329,13 @@ export default function Page() {
             <div className="text-white opacity-75">Post</div>
           </div>
           <div className="flex flex-col items-center">
-            <button className="opacity-75 focus:opacity-100 focus:drop-shadow-lg">
+            <button
+              className="opacity-75 focus:opacity-100 focus:drop-shadow-lg"
+              onClick={(e) => {
+                e.preventDefault();
+                router.push(`/group/${myDetail.id}`);
+              }}
+            >
               <img src="/group.svg" className="w-10 h-10 "></img>
             </button>
             <div className="text-white opacity-75">Group</div>

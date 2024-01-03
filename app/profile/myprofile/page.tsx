@@ -63,7 +63,7 @@ export default function Page() {
             fetchEvent(v)?.map((v, i) => {
               return (
                 <div>
-                  <Event details={v} key={i}></Event>
+                  <Event details={v} key={i} uId={myDetail.id}></Event>
                 </div>
               );
             })
@@ -101,6 +101,7 @@ export default function Page() {
                     key={i}
                     uId={myDetail.id}
                     type="upcoming"
+                    show={true}
                   ></Event>
                 </div>
               );
@@ -222,7 +223,7 @@ export default function Page() {
             ></img>
           </div>
           <div className="-translate-x-6 flex flex-col laptop:text-2xl text-xl self-center basis-1/3 ">
-            <div className="flex flex-row gap-4">
+            <div className="flex flex-row gap-4  w-max">
               <div className="font-semibold">{myDetail.name}</div>
               <button
                 onClick={(e) => {

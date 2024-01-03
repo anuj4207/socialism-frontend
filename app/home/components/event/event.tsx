@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { cancelEvent, joinEvent } from '../../api/route';
+import Pending from '@/app/profile/myprofile/components/pending/pending';
 
 export default function Event(props: any) {
   let data = props.details;
@@ -10,8 +11,8 @@ export default function Event(props: any) {
   let dateDate = data.date.slice(8, 10);
   const [joinError, setJoinError] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {}, [joinError]);
+  const [showUser, setShowUser] = useState(false);
+  useEffect(() => {}, [joinError, showUser]);
   async function joinEventReq() {
     let msg = await joinEvent(data.id);
     if (msg === 'error') {
@@ -73,11 +74,10 @@ export default function Event(props: any) {
     );
   }
   function joinDiv() {
-    console.log(props.uId, data.adminId);
-
+    console.log('upcoming', props.uId, data.confirmedUser);
     if (
       props.uId == data.adminId ||
-      data.confirmedUser.filter((v) => v == props.uId).length == 1
+      data.confirmedUser.filter((v) => v == props.uId).length > 0
     ) {
       return cancelDiv();
     } else if (data.pendingUser.filter((v) => v == props.uId).length == 0) {
@@ -100,6 +100,7 @@ export default function Event(props: any) {
       );
     }
   }
+
   function showProfile() {
     if (data.adminId != props.uId) {
       return (
@@ -130,7 +131,7 @@ export default function Event(props: any) {
           {data.description}
         </div>
         <div className="flex flex-row  w-full justify-start">
-          <div className="flex flex-col ">
+          <div className="flex flex-col gap-2">
             <div className="flex flex-row gap-2 items-center ">
               <img src="/time.svg" className="w-4 h-4 opacity-60" alt="404" />
               <div className="text-sm">{data.time}</div>
@@ -143,16 +144,25 @@ export default function Event(props: any) {
               />
               <div className="text-sm">{data.address}</div>
             </div>
-            <div className="flex flex-row gap-2 items-center">
-              <img
-                src="/group.svg"
-                className="w-4 h-4 opacity-60 -translate-y-1"
-                alt="404"
-              />
-              <div className="text-sm -translate-y-1">{data.maxMembers}</div>
+            <div className="flex flex-row  w-max gap-2 items-center">
+              <img src="/group.svg" className="w-4 h-4 opacity-60 " alt="404" />
+              <div className="text-sm ">{data.maxMembers}</div>
             </div>
           </div>
           <div className="flex flex-col  w-full items-end justify-around">
+            {props.show ? (
+              <div>
+                <button
+                  className="text-xs border-1 p-0.5 rounded-md bg-lightBlue ml-14"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowUser(true);
+                  }}
+                >
+                  Pending User
+                </button>
+              </div>
+            ) : null}
             <div className="">{showProfile()}</div>
             <div className="self-end">{joinDiv()}</div>
           </div>
@@ -162,17 +172,15 @@ export default function Event(props: any) {
   }
 
   return (
-    <div className="border-2 rounded-md border-lightBlueBg shadow-md h-32 flex flex-row my-2">
+    <div className="border-2 rounded-md border-lightBlueBg shadow-md h-36 flex flex-row my-2">
       <div className="h-full  bg-lightBlueBg">
         <div className="flex flex-col gap-1 m-2 items-center">
           <div className="font-medium text-white mt-0">{month(dateMonth)}</div>
           <div className="font-bold text-white text-2xl">{dateDate}</div>
         </div>
       </div>
-      {joinError ? (
-        <div className="flex w-full items-center justify-around text-lightPink font-thin">
-          400 Something Went Wrong
-        </div>
+      {showUser ? (
+        <Pending id={data.id} adminId={data.adminId} uId={props.uId}></Pending>
       ) : (
         basisDiv()
       )}
